@@ -4,9 +4,22 @@ CLI application designed for streaming large JSON files to a REST API
 
 ---
 
-<!-- START doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
 
-<!-- END doctoc -->
+- [Description](#description)
+  - [Key Features:](#key-features)
+- [Configuration](#configuration)
+  - [Environment File (`json_upload.env`)](#environment-file-json_uploadenv)
+- [Usage](#usage)
+- [Architecture](#architecture)
+  - [Bounded Context Diagram](#bounded-context-diagram)
+- [📄 License](#-license)
+- [🤝 Authors](#-authors)
+  - [Code Contributors](#code-contributors)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ---
 
