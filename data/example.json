@@ -1,0 +1,24 @@
+[
+  {
+    "schema_version": 1,
+    "id": 1,
+    "name": "Object 1",
+    "active": false,
+    "tags": ["alpha", "beta", "gamma"],
+    "metadata": {
+      "created": "2024-01-01T00:00:01Z",
+      "owner": "system"
+    }
+  },
+  {
+    "schema_version": 1,
+    "id": 2,
+    "name": "Object 2",
+    "active": true,
+    "tags": ["alpha", "beta", "gamma"],
+    "metadata": {
+      "created": "2024-01-01T00:00:02Z",
+      "owner": "system"
+    }
+  }
+]

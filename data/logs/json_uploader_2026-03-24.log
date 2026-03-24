@@ -1,0 +1,24 @@
+[2026-03-24 16:11:23.807] [info] JSON Uploader starting...
+[2026-03-24 16:11:23.807] [info] Authenticating with API at http://localhost:8080/login
+[2026-03-24 16:11:23.808] [info] Authentication successful
+[2026-03-24 16:11:23.808] [info] Starting upload of data/example.json (Compression: OFF)
+[2026-03-24 16:11:23.808] [info] Loading schema from data/example_schema.json
+[2026-03-24 16:11:23.808] [error] Workflow failed: Element validation failed
+[2026-03-24 16:11:23.808] [info] Sending status email via SMTP to zheng.bote@googlemail.com
+[2026-03-24 16:11:24.594] [info] Email sent successfully via SMTP
+[2026-03-24 16:11:56.586] [info] JSON Uploader starting...
+[2026-03-24 16:11:56.588] [info] Authenticating with API at http://localhost:8080/login
+[2026-03-24 16:11:56.588] [info] Authentication successful
+[2026-03-24 16:11:56.588] [info] Starting upload of data/example.json (Compression: OFF)
+[2026-03-24 16:11:56.588] [info] Loading schema from data/example_schema.json
+[2026-03-24 16:11:56.589] [error] Workflow failed: Element validation failed
+[2026-03-24 16:11:56.589] [info] Sending status email via SMTP to zheng.bote@googlemail.com
+[2026-03-24 16:11:57.222] [info] Email sent successfully via SMTP
+[2026-03-24 16:15:02.282] [info] JSON Uploader starting...
+[2026-03-24 16:15:02.283] [info] Authenticating with API at http://localhost:8080/login
+[2026-03-24 16:15:02.284] [info] Authentication successful
+[2026-03-24 16:15:02.284] [info] Starting upload of data/example.json (Compression: OFF)
+[2026-03-24 16:15:02.284] [info] Loading schema from data/example_schema.json
+[2026-03-24 16:15:02.325] [info] Upload completed successfully
+[2026-03-24 16:15:02.325] [info] Sending status email via SMTP to zheng.bote@googlemail.com
+[2026-03-24 16:15:02.986] [info] Email sent successfully via SMTP
