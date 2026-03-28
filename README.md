@@ -1,4 +1,4 @@
-# JSON Uploader (C++23)
+# JSON Uploader
 
 CLI application designed for streaming large JSON files to a REST API.
 
