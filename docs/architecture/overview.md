@@ -1,3 +1,18 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Architectural Overview - JSON Uploader](#architectural-overview---json-uploader)
+  - [Design Patterns](#design-patterns)
+  - [Diagrams](#diagrams)
+    - [1. Bounded Context & Interfaces](#1-bounded-context--interfaces)
+    - [2. Class Diagram](#2-class-diagram)
+    - [3. Sequence Diagram: Upload Workflow](#3-sequence-diagram-upload-workflow)
+    - [4. Component Diagram](#4-component-diagram)
+  - [Data Flow](#data-flow)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Architectural Overview - JSON Uploader
 
 This document provides a detailed overview of the system architecture, design patterns, and data flow within the JSON Uploader project.
