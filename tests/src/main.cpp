@@ -121,8 +121,8 @@ int main(int argc, char **argv) {
     CROW_ROUTE(app, "/upload")
         .methods(crow::HTTPMethod::Post)([&validTokens,
                                           baseDir](const crow::request &req) {
-          std::cout << "--- START RAW BODY ---\n"
-                    << req.body << "\n--- END RAW BODY ---\n";
+          // std::cout << "--- START RAW BODY ---\n"
+          //           << req.body << "\n--- END RAW BODY ---\n";
 
           // Authorization: Bearer <token>
           auto authIt = req.headers.find("Authorization");
@@ -153,6 +153,25 @@ int main(int argc, char **argv) {
             // Optional: minimale Strukturprüfung
             if (!parsed.is_object() && !parsed.is_array()) {
               return crow::response(400, "JSON must be object or array");
+            }
+
+            // Check for META_DEBUG=yes (stored as metadata.DEBUG in JSON)
+            auto check_debug = [](const json &obj) {
+              if (obj.contains("metadata") && obj["metadata"].is_object()) {
+                const auto &meta = obj["metadata"];
+                if (meta.contains("DEBUG") && meta["DEBUG"] == "yes") {
+                  std::cout << "--- METADATA DEBUG ---\n";
+                  std::cout << meta.dump(2) << "\n";
+                  std::cout << "----------------------\n";
+                }
+              }
+            };
+
+            if (parsed.is_array()) {
+              if (!parsed.empty())
+                check_debug(parsed[0]);
+            } else {
+              check_debug(parsed);
             }
 
           } catch (const std::exception &e) {

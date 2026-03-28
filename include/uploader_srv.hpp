@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * @file uploader_srv.hpp
- * @version 0.4.2
- * @date 2026-03-24
+ * @version 1.0.0
+ * @date 2026-03-28
  *
  * @author ZHENG Robert (robert@hase-zheng.net)
  * @copyright Copyright (c) 2026 ZHENG Robert
@@ -23,9 +23,19 @@
 #include <string>
 #include <vector>
 #include <zstd.h>
+#include <zlib.h>
 #include <simdjson.h>
 
 namespace ju {
+
+/**
+ * @brief Flush modes for compression.
+ */
+enum class FlushMode {
+    None,
+    Sync,
+    Finish
+};
 
 /**
  * @brief Service for streaming JSON upload with compression.
@@ -70,10 +80,13 @@ private:
         simdjson::ondemand::array_iterator array_it;
 
         ZSTD_CStream* cstream = nullptr;
+        z_stream gstream{};
+        bool gstream_init = false;
+        
         std::vector<char> output_buffer;
         size_t output_pos = 0;
         size_t output_size = 0;
-        bool zstd_finished = false;
+        bool compression_finished = false;
         
         ValidatorUtil* validator = nullptr;
         const Config* config = nullptr;
@@ -84,7 +97,7 @@ private:
         std::string debug_full_json;
     };
 
-    static bool compress_helper(StreamState* state, std::string_view data, ZSTD_EndDirective directive);
+    static bool compress_helper(StreamState* state, std::string_view data, FlushMode flush);
     static size_t ReadCallback(char* ptr, size_t size, size_t nmemb, void* userp);
     static size_t ResponseCallback(char* ptr, size_t size, size_t nmemb, void* userp);
 };

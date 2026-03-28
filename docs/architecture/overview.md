@@ -1,113 +1,155 @@
-# Architecture Documentation - JSON Uploader
+# Architectural Overview - JSON Uploader
 
-<!-- DOCTOC SKIP -->
+This document provides a detailed overview of the system architecture, design patterns, and data flow within the JSON Uploader project.
 
-## Overview
+## Design Patterns
 
-The JSON Uploader is a high-performance C++23 CLI tool designed for streaming large JSON files to a REST API. It combines iterative parsing, schema validation, optional compression, and automated SMTP notifications.
+- **Service-Provider Pattern**: Core business logic is encapsulated in services (`AuthSrv`, `UploaderSrv`, `EmailSrv`).
+- **Controller Pattern**: CLI parsing and main workflow orchestration are handled by controllers (`CliParserCtrl`).
+- **Utility Pattern**: Reusable, stateless logic is implemented in utility modules (`EnvUtil`, `LoggerUtil`, `ValidatorUtil`).
+- **Streaming Architecture**: Uses a callback-driven approach for data processing to handle large files without excessive memory consumption.
 
-## Components
+## Diagrams
 
-### Bounded Context Diagram
+### 1. Bounded Context & Interfaces
+
+This diagram illustrates the external interfaces and the main functional boundaries of the application.
 
 ```mermaid
 graph TD
-    User((User))
-    CLI[CLI Parser Ctrl]
-    ENV[ENV Util]
-    Logger[Logger Util]
-    Auth[Auth Srv]
-    Up[Uploader Srv]
-    Val[Validator Util]
-    Mail[Email Srv]
-    API_Login(API Login URL)
-    API_Upload(API Upload URL)
-    SMTP(SMTP Server)
+    subgraph LocalSystem [Local System]
+        User((User))
+        CLI[CLI Parser Ctrl]
+        ENV[ENV Util]
+        Logger[Logger Util]
+        FS[(File System)]
+    end
+
+    subgraph ExternalServices [External Services]
+        API_Auth(API Auth Endpoint)
+        API_Upload(API Upload Endpoint)
+        SMTP(SMTP Server)
+    end
 
     User -- CLI Args --> CLI
+    CLI -- Read --> FS
     CLI -- Load --> ENV
-    ENV -- Init --> Logger
-    CLI -- Orchestrate --> Auth
-    Auth -- POST login --> API_Login
-    CLI -- Orchestrate --> Up
-    Up -- Validate --> Val
-    Up -- POST upload chunked --> API_Upload
-    CLI -- Notify --> Mail
-    Mail -- SMTP Send --> SMTP
+    ENV -- Decrypt/Parse --> FS
+    CLI -- Init --> Logger
+    CLI -- POST Login --> API_Auth
+    CLI -- Streaming POST --> API_Upload
+    CLI -- SMTP Send --> SMTP
 ```
 
-### Component Diagram
+### 2. Class Diagram
+
+```mermaid
+classDiagram
+    class Config {
+        +path json_path
+        +path schema_path
+        +path env_path
+        +bool env_encrypted
+        +string env_pass_var
+        +CompressionType api_compression
+        +map metadata
+    }
+
+    class CliParserCtrl {
+        +static parse(int argc, char** argv) Expected~Config~
+    }
+
+    class EnvUtil {
+        +load_env_file(Config config) Expected~void~
+        +get_env(string key) string
+        +get_meta_env() map
+    }
+
+    class AuthSrv {
+        -Config config
+        +login() Expected~string~
+    }
+
+    class UploaderSrv {
+        -Config config
+        -string token
+        +upload() Expected~void~
+        -compress_helper(StreamState, data, FlushMode) bool
+    }
+
+    class EmailSrv {
+        -Config config
+        +send_status(bool success, string msg) Expected~void~
+    }
+
+    CliParserCtrl ..> Config : creates
+    AuthSrv --> Config : uses
+    UploaderSrv --> Config : uses
+    EmailSrv --> Config : uses
+    EnvUtil --> Config : modifies
+```
+
+### 3. Sequence Diagram: Upload Workflow
+
+```mermaid
+sequenceDiagram
+    participant Main
+    participant CLI as CliParserCtrl
+    participant ENV as EnvUtil
+    participant Auth as AuthSrv
+    participant Up as UploaderSrv
+    participant API
+
+    Main->>CLI: parse(argc, argv)
+    CLI-->>Main: Config
+    Main->>ENV: load_env_file(Config)
+    ENV->>Main: (Env Loaded)
+    Main->>Auth: login()
+    Auth->>API: POST /login
+    API-->>Auth: Token
+    Auth-->>Main: Token
+    Main->>Up: upload()
+    loop For each JSON object
+        Up->>Up: Validate
+        Up->>Up: Merge Metadata
+        Up->>Up: Compress (Zstd/Gzip)
+        Up->>API: POST /upload (Chunked)
+    end
+    API-->>Up: 200 OK
+    Up-->>Main: Success
+```
+
+### 4. Component Diagram
 
 ```mermaid
 graph TD
-    subgraph App [Application Layer]
-        Main[Main Orchestrator]
-        CLI[CLI Parser Ctrl]
-    end
-
-    subgraph Srv [Service Layer]
-        AuthS[Auth Srv]
-        UpS[Uploader Srv]
-        MailS[Email Srv]
-    end
-
-    subgraph Util [Utility Layer]
-        ValU[Validator Util]
-        EnvU[ENV Util]
-        LogU[Logger Util]
-    end
-
-    subgraph Types [Domain Models / Types]
-        CfgT[Config Type]
-        ErrT[Error Type]
-    end
+    Main[Main Orchestrator]
+    CLI[CLI Controller]
+    ENV[Environment Module]
+    Sodium[Sodium Decryption]
+    Auth[Auth Service]
+    Up[Uploader Service]
+    Val[Validation Engine]
+    Comp[Compression Engine]
 
     Main --> CLI
-    CLI --> AuthS
-    CLI --> UpS
-    CLI --> MailS
-    UpS --> ValU
-    CLI --> EnvU
-    EnvU --> LogU
-    Srv --> Types
-    Util --> Types
+    Main --> ENV
+    ENV --> Sodium
+    Main --> Auth
+    Main --> Up
+    Up --> Val
+    Up --> Comp
 ```
 
-## Data Flow & Processing
+## Data Flow
 
-### 1. Initialization
-
-- **CLI Parsing**: The command line arguments are processed to determine file paths and modes.
-- **Environment**: The `ENV Util` loads configuration from `data/json_upload.env`.
-- **Logging**: A daily rotating `spdlog` instance is initialized.
-
-### 2. Authentication
-
-- The `Auth Srv` performs a `POST` request to `API_LOGIN_URL` with the payload `{"user": "...", "password": "..."}`.
-- Upon success, a Bearer Token is extracted from the JSON response.
-
-### 3. Streaming Upload
-
-- **Input Processing**: `simdjson` is used to iterate through the input file. It supports both top-level arrays and concatenated JSON objects (JSON-L).
-- **Validation**: Each individual object is validated against the provided JSON schema using `Validator Util`.
-- **Transformation**: To ensure server compatibility, the tool flattens all inputs and wraps them into a **single JSON array** (`[...]`), with elements separated by commas.
-- **Compression**: If `API_COMPRESSION` is enabled, chunks are compressed on-the-fly using `zstd`.
-- **Transmission**: `libcurl` handles the `HTTP/1.1 Chunked Transfer Encoding` upload to `API_UPLOAD_URL`.
-
-### 4. Notification
-
-- After the workflow finishes (successfully or with an error), the `Email Srv` sends a status report via SMTP.
-- Support for `STARTTLS` ensures secure communication with the mail server.
-
-## Modern C++23 Implementation
-
-- **std::expected<T, E>**: Primary error handling mechanism to avoid exceptions in performance-critical paths.
-- **std::print / std::println**: Used for high-performance console output.
-- **Monadic Operations**: `.and_then()` and `.or_else()` are used to chain service calls elegantly.
-- **Platform Agnostic**: Designed to run on Linux and Windows (via `_putenv_s` for environment management).
-
-## Performance Optimization
-
-- **Memory Footprint**: The application never loads the entire JSON file into RAM. It processes one object at a time.
-- **CPU Efficiency**: Leveraging `simdjson`'s SIMD instructions and `zstd`'s streaming API for maximum throughput.
-- **Real-time Streaming**: Data is flushed to the network as soon as a chunk is ready, reducing overall latency.
+1.  **Configuration Phase**: CLI arguments are parsed into a `Config` object.
+2.  **Environment Phase**: The `.env` file is loaded. If encrypted, `libsodium` is used for in-memory decryption.
+3.  **Authentication Phase**: Credentials from the environment are used to obtain a Bearer Token.
+4.  **Upload Phase**:
+    -   The JSON file is read as a stream using `simdjson`.
+    -   Each object is validated against the schema.
+    -   Environment variables prefixed with `META_` are merged into the object's `metadata` field.
+    -   The object is compressed using the configured algorithm (Zstd or Gzip).
+    -   Data is sent to the API via chunked transfer encoding.
+5.  **Notification Phase**: If enabled, an email is sent with the final status.

@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * @file uploader_srv.cpp
- * @version 0.4.3
- * @date 2026-03-24
+ * @version 1.0.0
+ * @date 2026-03-28
  *
  * @author ZHENG Robert (robert@hase-zheng.net)
  * @copyright Copyright (c) 2026 ZHENG Robert
@@ -28,44 +28,82 @@ UploaderSrv::UploaderSrv(const Config& config, std::string bearer_token)
 
 UploaderSrv::~UploaderSrv() = default;
 
-bool UploaderSrv::compress_helper(StreamState* state, std::string_view data, ZSTD_EndDirective directive) {
+bool UploaderSrv::compress_helper(StreamState* state, std::string_view data, FlushMode flush) {
     if (!data.empty()) {
         state->debug_full_json.append(data);
     }
     
-    if (state->config && !state->config->api_compression) {
+    if (state->config && state->config->api_compression == CompressionType::None) {
         if (!data.empty()) {
             state->output_buffer.insert(state->output_buffer.end(), data.begin(), data.end());
             state->output_size = state->output_buffer.size();
         }
-        if (directive == ZSTD_e_end) state->zstd_finished = true;
+        if (flush == FlushMode::Finish) state->compression_finished = true;
         return true;
     }
 
-    ZSTD_inBuffer input = { data.data(), data.size(), 0 };
-    while (input.pos < input.size || (directive != ZSTD_e_continue && !state->zstd_finished)) {
-        ZSTD_outBuffer output = { state->output_buffer.data() + state->output_size, 
-                                  state->output_buffer.size() - state->output_size, 0 };
-        
-        if (output.size == 0) {
-            state->output_buffer.resize(state->output_buffer.size() + ZSTD_CStreamOutSize());
-            output.dst = state->output_buffer.data() + state->output_size;
-            output.size = state->output_buffer.size() - state->output_size;
-        }
+    if (state->config->api_compression == CompressionType::Zstd) {
+        ZSTD_EndDirective directive = ZSTD_e_continue;
+        if (flush == FlushMode::Sync) directive = ZSTD_e_flush;
+        else if (flush == FlushMode::Finish) directive = ZSTD_e_end;
 
-        size_t const ret = ZSTD_compressStream2(state->cstream, &output, &input, directive);
-        if (ZSTD_isError(ret)) {
-            state->has_error = true;
-            state->last_error = {ErrorCode::CompressionError, ZSTD_getErrorName(ret)};
-            return false;
+        ZSTD_inBuffer input = { data.data(), data.size(), 0 };
+        while (input.pos < input.size || (directive != ZSTD_e_continue && !state->compression_finished)) {
+            ZSTD_outBuffer output = { state->output_buffer.data() + state->output_size, 
+                                      state->output_buffer.size() - state->output_size, 0 };
+            
+            if (output.size == 0) {
+                state->output_buffer.resize(state->output_buffer.size() + ZSTD_CStreamOutSize());
+                output.dst = state->output_buffer.data() + state->output_size;
+                output.size = state->output_buffer.size() - state->output_size;
+            }
+
+            size_t const ret = ZSTD_compressStream2(state->cstream, &output, &input, directive);
+            if (ZSTD_isError(ret)) {
+                state->has_error = true;
+                state->last_error = {ErrorCode::CompressionError, ZSTD_getErrorName(ret)};
+                return false;
+            }
+            state->output_size += output.pos;
+            if (directive == ZSTD_e_end && ret == 0) {
+                state->compression_finished = true;
+                break;
+            }
+            if (input.pos == input.size && output.pos == 0) break; 
         }
-        state->output_size += output.pos;
-        if (directive == ZSTD_e_end && ret == 0) {
-            state->zstd_finished = true;
-            break;
+    } else if (state->config->api_compression == CompressionType::Gzip) {
+        int zflush = Z_NO_FLUSH;
+        if (flush == FlushMode::Sync) zflush = Z_SYNC_FLUSH;
+        else if (flush == FlushMode::Finish) zflush = Z_FINISH;
+
+        state->gstream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(data.data()));
+        state->gstream.avail_in = static_cast<uInt>(data.size());
+
+        while (state->gstream.avail_in > 0 || (zflush != Z_NO_FLUSH && !state->compression_finished)) {
+            if (state->output_size >= state->output_buffer.size()) {
+                state->output_buffer.resize(state->output_buffer.size() + 16384);
+            }
+            
+            state->gstream.next_out = reinterpret_cast<Bytef*>(state->output_buffer.data() + state->output_size);
+            state->gstream.avail_out = static_cast<uInt>(state->output_buffer.size() - state->output_size);
+            
+            int ret = deflate(&state->gstream, zflush);
+            if (ret == Z_STREAM_ERROR) {
+                state->has_error = true;
+                state->last_error = {ErrorCode::CompressionError, "Gzip deflate error"};
+                return false;
+            }
+            
+            state->output_size = state->output_buffer.size() - state->gstream.avail_out;
+            
+            if (ret == Z_STREAM_END) {
+                state->compression_finished = true;
+                break;
+            }
+            if (state->gstream.avail_in == 0 && state->gstream.avail_out != 0) break;
         }
-        if (input.pos == input.size && output.pos == 0) break; 
     }
+
     return true;
 }
 
@@ -105,7 +143,7 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
         switch (state->stage) {
             case Stage::Init:
                 state->stage = Stage::ProcessDoc;
-                if (!compress_helper(state, "[", ZSTD_e_flush)) return CURL_READFUNC_ABORT;
+                if (!compress_helper(state, "[", FlushMode::Sync)) return CURL_READFUNC_ABORT;
                 break;
 
             case Stage::ProcessDoc:
@@ -130,20 +168,32 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
                     } else {
                         std::string_view json_view;
                         if (doc.raw_json().get(json_view) == simdjson::SUCCESS) {
-                            if (!state->validator->validate(json_view)) {
+                            auto val_res = state->validator->validate(json_view);
+                            if (!val_res) {
                                 state->has_error = true;
-                                state->last_error = {ErrorCode::SchemaValidationError, "Doc validation failed"};
+                                state->last_error = val_res.error();
                                 return CURL_READFUNC_ABORT;
                             }
                             if (!state->is_first_element) {
-                                if (!compress_helper(state, ",", ZSTD_e_flush)) return CURL_READFUNC_ABORT;
+                                if (!compress_helper(state, ",", FlushMode::Sync)) return CURL_READFUNC_ABORT;
                             }
                             try {
                                 auto j = nlohmann::json::parse(json_view);
+                                
+                                // Merge metadata from Config
+                                if (!state->config->metadata.empty()) {
+                                    if (!j.contains("metadata")) {
+                                        j["metadata"] = nlohmann::json::object();
+                                    }
+                                    for (const auto& [k, v] : state->config->metadata) {
+                                        j["metadata"][k] = v;
+                                    }
+                                }
+
                                 std::string cleaned = j.dump();
-                                if (!compress_helper(state, cleaned, ZSTD_e_flush)) return CURL_READFUNC_ABORT;
+                                if (!compress_helper(state, cleaned, FlushMode::Sync)) return CURL_READFUNC_ABORT;
                             } catch (...) {
-                                if (!compress_helper(state, json_view, ZSTD_e_flush)) return CURL_READFUNC_ABORT;
+                                if (!compress_helper(state, json_view, FlushMode::Sync)) return CURL_READFUNC_ABORT;
                             }
                             state->is_first_element = false;
                         }
@@ -152,7 +202,7 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
                     }
                 } else {
                     state->stage = Stage::FlushEnd;
-                    if (!compress_helper(state, "]", ZSTD_e_flush)) return CURL_READFUNC_ABORT;
+                    if (!compress_helper(state, "]", FlushMode::Sync)) return CURL_READFUNC_ABORT;
                 }
                 break;
 
@@ -167,20 +217,32 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
                     auto element = element_res.value();
                     std::string_view json_view;
                     if (element.raw_json().get(json_view) == simdjson::SUCCESS) {
-                        if (!state->validator->validate(json_view)) {
+                        auto val_res = state->validator->validate(json_view);
+                        if (!val_res) {
                             state->has_error = true;
-                            state->last_error = {ErrorCode::SchemaValidationError, "Element validation failed"};
+                            state->last_error = val_res.error();
                             return CURL_READFUNC_ABORT;
                         }
                         if (!state->is_first_element) {
-                            if (!compress_helper(state, ",", ZSTD_e_flush)) return CURL_READFUNC_ABORT;
+                            if (!compress_helper(state, ",", FlushMode::Sync)) return CURL_READFUNC_ABORT;
                         }
                         try {
                             auto j = nlohmann::json::parse(json_view);
+
+                            // Merge metadata from Config
+                            if (!state->config->metadata.empty()) {
+                                if (!j.contains("metadata")) {
+                                    j["metadata"] = nlohmann::json::object();
+                                }
+                                for (const auto& [k, v] : state->config->metadata) {
+                                    j["metadata"][k] = v;
+                                }
+                            }
+
                             std::string cleaned = j.dump();
-                            if (!compress_helper(state, cleaned, ZSTD_e_flush)) return CURL_READFUNC_ABORT;
+                            if (!compress_helper(state, cleaned, FlushMode::Sync)) return CURL_READFUNC_ABORT;
                         } catch (...) {
-                            if (!compress_helper(state, json_view, ZSTD_e_flush)) return CURL_READFUNC_ABORT;
+                            if (!compress_helper(state, json_view, FlushMode::Sync)) return CURL_READFUNC_ABORT;
                         }
                         state->is_first_element = false;
                     }
@@ -194,7 +256,7 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
                 break;
 
             case Stage::FlushEnd:
-                if (!compress_helper(state, "", ZSTD_e_end)) return CURL_READFUNC_ABORT;
+                if (!compress_helper(state, "", FlushMode::Finish)) return CURL_READFUNC_ABORT;
                 state->stage = Stage::Done;
                 break;
 
@@ -206,7 +268,11 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
 }
 
 Expected<void> UploaderSrv::upload() {
-    spdlog::info("Starting upload of {} (Compression: {})", config_.json_path.string(), config_.api_compression ? "ON" : "OFF");
+    std::string comp_str = "NONE";
+    if (config_.api_compression == CompressionType::Zstd) comp_str = "ZSTD";
+    else if (config_.api_compression == CompressionType::Gzip) comp_str = "GZIP";
+    
+    spdlog::info("Starting upload of {} (Compression: {})", config_.json_path.string(), comp_str);
     
     auto load_res = validator_.load_schema();
     if (!load_res) return load_res;
@@ -226,23 +292,34 @@ Expected<void> UploaderSrv::upload() {
         state.stream_at_end = true;
     }
     
-    state.output_buffer.reserve(ZSTD_CStreamOutSize());
-    if (config_.api_compression) {
+    state.output_buffer.reserve(32768);
+    if (config_.api_compression == CompressionType::Zstd) {
         state.cstream = ZSTD_createCStream();
         ZSTD_initCStream(state.cstream, 1);
+    } else if (config_.api_compression == CompressionType::Gzip) {
+        state.gstream.zalloc = Z_NULL;
+        state.gstream.zfree = Z_NULL;
+        state.gstream.opaque = Z_NULL;
+        if (deflateInit2(&state.gstream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 + 16, 8, Z_DEFAULT_STRATEGY) != Z_OK) {
+            return std::unexpected(Error{ErrorCode::InternalError, "Gzip init failed"});
+        }
+        state.gstream_init = true;
     }
 
     CURL* curl = curl_easy_init();
     if (!curl) {
         if (state.cstream) ZSTD_freeCStream(state.cstream);
+        if (state.gstream_init) deflateEnd(&state.gstream);
         return std::unexpected(Error{ErrorCode::InternalError, "CURL init failed"});
     }
 
     struct curl_slist* headers = nullptr;
     headers = curl_slist_append(headers, ("Authorization: Bearer " + token_).c_str());
     headers = curl_slist_append(headers, "Content-Type: application/json");
-    if (config_.api_compression) {
+    if (config_.api_compression == CompressionType::Zstd) {
         headers = curl_slist_append(headers, "Content-Encoding: zstd");
+    } else if (config_.api_compression == CompressionType::Gzip) {
+        headers = curl_slist_append(headers, "Content-Encoding: gzip");
     }
     headers = curl_slist_append(headers, "Transfer-Encoding: chunked");
 
@@ -262,6 +339,7 @@ Expected<void> UploaderSrv::upload() {
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
     if (state.cstream) ZSTD_freeCStream(state.cstream);
+    if (state.gstream_init) deflateEnd(&state.gstream);
 
     if (state.has_error) return std::unexpected(state.last_error);
     if (res != CURLE_OK) return std::unexpected(Error{ErrorCode::UploadFailed, curl_easy_strerror(res)});

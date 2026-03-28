@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * @file logger_util.cpp
- * @version 0.2.8
- * @date 2026-03-24
+ * @version 1.0.0
+ * @date 2026-03-28
  *
  * @author ZHENG Robert (robert@hase-zheng.net)
  * @copyright Copyright (c) 2026 ZHENG Robert
@@ -18,10 +18,32 @@
 #include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <vector>
+#include <algorithm>
+#include <cctype>
 
 namespace ju {
 
-Expected<void> init_logger(const std::filesystem::path &log_dir) {
+namespace {
+/**
+ * @brief Converts a string to spdlog level.
+ */
+spdlog::level::level_enum to_spdlog_level(std::string_view level) {
+  std::string lvl(level);
+  std::transform(lvl.begin(), lvl.end(), lvl.begin(),
+                 [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+  if (lvl == "trace") return spdlog::level::trace;
+  if (lvl == "debug") return spdlog::level::debug;
+  if (lvl == "info") return spdlog::level::info;
+  if (lvl == "warn" || lvl == "warning") return spdlog::level::warn;
+  if (lvl == "error") return spdlog::level::err;
+  if (lvl == "critical") return spdlog::level::critical;
+  if (lvl == "off") return spdlog::level::off;
+  return spdlog::level::info;
+}
+} // namespace
+
+Expected<void> init_logger(const std::filesystem::path &log_dir, std::string_view log_level) {
   try {
     if (!std::filesystem::exists(log_dir)) {
       std::filesystem::create_directories(log_dir);
@@ -45,9 +67,11 @@ Expected<void> init_logger(const std::filesystem::path &log_dir) {
                                                    sinks.end());
 
     spdlog::set_default_logger(logger);
-    spdlog::set_level(spdlog::level::info);
+    
+    auto level = to_spdlog_level(log_level);
+    spdlog::set_level(level);
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] %v");
-    spdlog::flush_on(spdlog::level::info);
+    spdlog::flush_on(level);
 
   } catch (const spdlog::spdlog_ex &ex) {
     return std::unexpected(

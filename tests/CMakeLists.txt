@@ -4,6 +4,7 @@ project(crow_test_server LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
 
@@ -47,3 +48,6 @@ target_link_libraries(crow_test_server PRIVATE
     Crow::Crow
     nlohmann_json::nlohmann_json
 )
+
+file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/libs.txt" 
+     CONTENT "$<TARGET_PROPERTY:crow_test_server,LINK_LIBRARIES>")

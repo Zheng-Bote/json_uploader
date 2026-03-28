@@ -7,8 +7,8 @@
  *
  * @file config.hpp
  * @brief Configuration structure and ENV variable loader.
- * @version 0.2.8
- * @date 2026-03-24
+ * @version 1.0.0
+ * @date 2026-03-28
  *
  * @author ZHENG Robert (robert@hase-zheng.net)
  * @copyright Copyright (c) 2026 ZHENG Robert

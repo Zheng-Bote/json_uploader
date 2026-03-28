@@ -7,8 +7,8 @@
  *
  * @file main.cpp
  * @brief Orchestrates the JSON validation, compression, and upload process.
- * @version 0.4.1
- * @date 2026-03-24
+ * @version 1.0.0
+ * @date 2026-03-28
  *
  * @author ZHENG Robert (robert@hase-zheng.net)
  * @copyright Copyright (c) 2026 ZHENG Robert
@@ -39,10 +39,13 @@ int main(int argc, char** argv) {
     auto& config = *config_res;
 
     // 2. Load ENV file
-    auto env_res = ju::load_env_file(config.env_path);
+    auto env_res = ju::load_env_file(config);
     if (!env_res) {
         std::println(stderr, "Warning: {}", env_res.error().message);
     }
+
+    // 2.1 Load Metadata from ENV (after .env is processed)
+    config.metadata = ju::get_meta_env();
 
     // 3. Complete Config from ENV
     config.api_login_url = ju::get_env("API_LOGIN_URL");
@@ -50,7 +53,14 @@ int main(int argc, char** argv) {
     config.api_user = ju::get_env("API_USER");
     config.api_password = ju::get_env("API_PASSWORD");
     config.api_email = ju::get_env("API_EMAIL");
-    config.api_compression = ju::get_env("API_COMPRESSION", "false") == "true";
+    
+    std::string comp_val = ju::get_env("API_COMPRESSION", "none");
+    std::transform(comp_val.begin(), comp_val.end(), comp_val.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    
+    if (comp_val == "zstd") config.api_compression = ju::CompressionType::Zstd;
+    else if (comp_val == "gzip") config.api_compression = ju::CompressionType::Gzip;
+    else config.api_compression = ju::CompressionType::None;
     
     // SMTP
     config.smtp_server = ju::get_env("SMTP_SERVER");
@@ -66,6 +76,7 @@ int main(int argc, char** argv) {
     config.smtp_starttls = ju::get_env("SMTP_STARTTLS", "true") == "true";
 
     config.log_path = ju::get_env("LOG_PATH", "logs");
+    config.log_level = ju::get_env("LOG_LEVEL", "Info");
 
     if (config.api_login_url.empty() || config.api_upload_url.empty() || 
         config.api_user.empty() || config.api_password.empty()) {
@@ -74,7 +85,7 @@ int main(int argc, char** argv) {
     }
 
     // 4. Logger Init
-    auto log_res = ju::init_logger(config.log_path);
+    auto log_res = ju::init_logger(config.log_path, config.log_level);
     if (!log_res) {
         std::println(stderr, "Logger Error: {}", log_res.error().message);
         return 1;

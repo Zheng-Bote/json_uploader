@@ -1,0 +1,27 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2026-03-28
+
+### Added
+- Integrated `dotenv-cpp` for flexible environment variable management.
+- Added support for encrypted `.env` files using `libsodium` (XChaCha20-Poly1305).
+- Implemented Gzip compression support alongside existing Zstd support for API uploads.
+- Added dynamic log level control via `LOG_LEVEL` environment variable.
+- Added metadata extraction from environment variables starting with `META_`.
+- Implemented `ExternalProject_Add` in CMake for robust `libsodium` integration.
+- Added `--encrypted` and `--env-pass-var` CLI parameters.
+
+### Changed
+- Refactored `EnvUtil` to support in-memory parsing of decrypted environment data.
+- Updated `UploaderSrv` to handle multiple compression formats and merge metadata into JSON payloads.
+- Updated default `.env` file path to `data/json_uploader.env`.
+- Switched to C++23 standards for core logic.
+
+### Fixed
+- Fixed redundant buffer copies in compression stream handling.
+- Improved error reporting for network and authentication failures.

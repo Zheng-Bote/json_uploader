@@ -7,8 +7,8 @@
  *
  * @file logger_util.hpp
  * @brief Logging utility based on spdlog with daily rotation.
- * @version 0.2.8
- * @date 2026-03-24
+ * @version 1.0.0
+ * @date 2026-03-28
  *
  * @author ZHENG Robert (robert@hase-zheng.net)
  * @copyright Copyright (c) 2026 ZHENG Robert
@@ -28,9 +28,10 @@ namespace ju {
  * @brief Initializes the global logger.
  * 
  * @param log_dir Directory where logs will be stored.
+ * @param log_level String representation of the log level (e.g., "Info", "Debug").
  * @return Expected<void>
  */
-[[nodiscard]] Expected<void> init_logger(const std::filesystem::path& log_dir);
+[[nodiscard]] Expected<void> init_logger(const std::filesystem::path& log_dir, std::string_view log_level = "Info");
 
 /**
  * @brief Shuts down the logger.

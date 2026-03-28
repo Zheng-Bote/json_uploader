@@ -7,8 +7,8 @@
  *
  * @file config_type.hpp
  * @brief Configuration structure.
- * @version 0.4.1
- * @date 2026-03-24
+ * @version 1.0.0
+ * @date 2026-03-28
  *
  * @author ZHENG Robert (robert@hase-zheng.net)
  * @copyright Copyright (c) 2026 ZHENG Robert
@@ -21,8 +21,18 @@
 #include <string>
 #include <optional>
 #include <filesystem>
+#include <map>
 
 namespace ju {
+
+/**
+ * @brief Compression types for API upload.
+ */
+enum class CompressionType {
+    None,
+    Zstd,
+    Gzip
+};
 
 /**
  * @brief Configuration parameters for the application.
@@ -31,6 +41,8 @@ struct Config {
     std::filesystem::path json_path;
     std::filesystem::path schema_path;
     std::filesystem::path env_path;
+    bool env_encrypted = false;
+    std::string env_pass_var = "ENV_PASS";
     bool send_email = false;
 
     // API
@@ -38,7 +50,7 @@ struct Config {
     std::string api_upload_url;
     std::string api_user;
     std::string api_password;
-    bool api_compression = false;
+    CompressionType api_compression = CompressionType::None;
     
     // SMTP (for Email)
     std::optional<std::string> api_email;
@@ -51,6 +63,10 @@ struct Config {
 
     // Logging
     std::filesystem::path log_path;
+    std::string log_level = "Info";
+
+    // Metadata
+    std::map<std::string, std::string> metadata;
 };
 
 } // namespace ju
