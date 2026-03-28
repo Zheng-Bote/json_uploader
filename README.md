@@ -10,6 +10,9 @@ CLI application designed for streaming large JSON files to a REST API.
 
 - [Description](#description)
   - [Key Features:](#key-features)
+- [Dependencies](#dependencies)
+  - [System Requirements (Ubuntu example)](#system-requirements-ubuntu-example)
+  - [Libraries managed via CMake](#libraries-managed-via-cmake)
 - [Documentation](#documentation)
 - [Configuration](#configuration)
   - [Environment File (`json_uploader.env`)](#environment-file-json_uploaderenv)
