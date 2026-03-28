@@ -44,6 +44,39 @@ This tool is a high-performance CLI application designed for streaming large JSO
 - **Robust JSON Formatting**: Automatically wraps multiple objects or input arrays into a single, valid JSON array for maximum server compatibility.
 - **Email Notifications**: Direct status reporting via SMTP with STARTTLS support.
 
+## Dependencies
+
+The project requires a C++23 compatible compiler and several libraries.
+
+### System Requirements (Ubuntu example)
+
+To install all necessary build tools and dependencies on Ubuntu, run:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    pkg-config \
+    autoconf \
+    automake \
+    libtool \
+    libcurl4-openssl-dev \
+    zlib1g-dev \
+    libsimdjson-dev \
+    libzstd-dev \
+    nlohmann-json3-dev \
+    libspdlog-dev \
+    libvalijson-dev
+```
+
+### Libraries managed via CMake
+
+The following libraries are automatically downloaded and built during the configuration phase:
+- **dotenv-cpp**: For environment variable management.
+- **libsodium**: For secure `.env` file decryption.
+
 ## Documentation
 
 The project documentation is structured to provide clear insights for developers and users:
