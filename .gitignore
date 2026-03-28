@@ -1,0 +1,10 @@
+build/
+tests/build/
+tests/testserver
+tests/.cache
+
+data/hr_*
+data/json_uploader.env
+data/json_uploader.env_email
+GEMINI.md
+
