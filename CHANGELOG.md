@@ -3,8 +3,10 @@
 **Table of Contents**
 
 - [Changelog](#changelog)
-  - [[1.0.0] - 2026-03-28](#100---2026-03-28)
+  - [[1.1.0] - 2026-03-29](#110---2026-03-29)
     - [Added](#added)
+  - [[1.0.0] - 2026-03-28](#100---2026-03-28)
+    - [Added](#added-1)
     - [Changed](#changed)
     - [Fixed](#fixed)
 
