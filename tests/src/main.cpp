@@ -155,15 +155,26 @@ int main(int argc, char **argv) {
               return crow::response(400, "JSON must be object or array");
             }
 
-            // Check for META_DEBUG=yes (stored as metadata.DEBUG in JSON)
+            // Check for META_DEBUG=yes (stored as metadata.DEBUG or top-level DEBUG)
             auto check_debug = [](const json &obj) {
+              bool debug_found = false;
+              json meta_data = json::object();
+
               if (obj.contains("metadata") && obj["metadata"].is_object()) {
                 const auto &meta = obj["metadata"];
                 if (meta.contains("DEBUG") && meta["DEBUG"] == "yes") {
-                  std::cout << "--- METADATA DEBUG ---\n";
-                  std::cout << meta.dump(2) << "\n";
-                  std::cout << "----------------------\n";
+                  debug_found = true;
+                  meta_data = meta;
                 }
+              } else if (obj.contains("DEBUG") && obj["DEBUG"] == "yes") {
+                debug_found = true;
+                meta_data = obj; // Use whole object as context for single mode
+              }
+
+              if (debug_found) {
+                std::cout << "--- METADATA DEBUG ---\n";
+                std::cout << meta_data.dump(2) << "\n";
+                std::cout << "----------------------\n";
               }
             };
 

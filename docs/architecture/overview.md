@@ -167,7 +167,10 @@ graph TD
 4.  **Upload Phase**:
     - The JSON file is read as a stream using `simdjson`.
     - Each object is validated against the schema.
-    - Environment variables prefixed with `META_` are merged into the object's `metadata` field.
+    - Environment variables prefixed with `META_` are merged into the object (Behavior controlled by `API_META`).
+      - `none`: No metadata is added.
+      - `object`: Metadata is added as a nested `metadata` object (default).
+      - `single`: Metadata is added as top-level attributes.
     - The object is compressed using the configured algorithm (Zstd or Gzip).
     - Data is sent to the API via chunked transfer encoding.
 5.  **Notification Phase**: If enabled, an email is sent with the final status.

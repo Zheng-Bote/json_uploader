@@ -1,11 +1,21 @@
-# JSON Uploader
+<div id="top" align="center">
+<h1>JSON Uploader</h1>
 
-CLI application designed for streaming large JSON files to a REST API.
+<p>CLI application designed for streaming large JSON files to a REST API.</p>
+
+![License](https://img.shields.io/badge/license-Apache_2.0-green)
+![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Zheng-Bote/json_uploader?logo=GitHub)](https://github.com/Zheng-Bote/json_uploader/releases)
+<br/>
+[Report Issue](https://github.com/Zheng-Bote/json_uploader/issues) · [Request Feature](https://github.com/Zheng-Bote/json_uploader/pulls)
+
+</div>
 
 ---
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [Description](#description)
@@ -29,6 +39,8 @@ CLI application designed for streaming large JSON files to a REST API.
 
 ## Description
 
+![Language](https://img.shields.io/badge/language-C%2B%2B23-00599C.svg)
+
 This tool is a high-performance CLI application designed for streaming large JSON files to a REST API. It handles multi-gigabyte files efficiently by using streaming techniques and modern compression.
 
 ### Key Features:
@@ -43,7 +55,10 @@ This tool is a high-performance CLI application designed for streaming large JSO
   - **valijson**: Precise schema validation before transmission.
   - **Multiple Compression Modes**: Supports **Zstd**, **Gzip**, and uncompressed uploads.
   - **libcurl**: Chunked HTTPS upload starting as soon as the first object is processed.
-- **Metadata Support**: Automatically extracts environment variables starting with `META_` and merges them into the `metadata` field of each uploaded JSON object.
+- **Metadata Support**: Automatically extracts environment variables starting with `META_`. Behavior is controlled by `API_META=<none|object|single>` (Default: `object`).
+  - `none`: No metadata added.
+  - `object`: Metadata merged into a `metadata` object field.
+  - `single`: Metadata merged as top-level attributes into each JSON object.
 - **Robust JSON Formatting**: Automatically wraps multiple objects or input arrays into a single, valid JSON array for maximum server compatibility.
 - **Email Notifications**: Direct status reporting via SMTP with STARTTLS support.
 
@@ -77,6 +92,7 @@ sudo apt-get install -y \
 ### Libraries managed via CMake
 
 The following libraries are automatically downloaded and built during the configuration phase:
+
 - **dotenv-cpp**: For environment variable management.
 - **libsodium**: For secure `.env` file decryption.
 
@@ -97,31 +113,36 @@ Default path: `<program_dir>/../data/json_uploader.env`. Can be overridden via `
 Example content:
 
 ```env
+# JSON Uploader Configuration
+# Author: ZHENG Robert
+# Date: 2026-03-29
+
 # API Configuration
 API_LOGIN_URL=https://api.example.com/login
 API_UPLOAD_URL=https://api.example.com/upload
 API_USER=admin
 API_PASSWORD=change_me
-
 # Compression: zstd, gzip, none
 API_COMPRESSION=zstd
+# Metadata behavior: object, single, none
+API_META=object
+
+# Email Notification
+API_EMAIL=api.alerts@myemail.com
+SMTP_SERVER=smtp.googlemail.com
+SMTP_PORT=587
+SMTP_USER=api.admin@myemail.com
+SMTP_PASSWORD=topsecret
+SMTP_FROM=api.admin@myemail.com
+SMTP_STARTTLS=true
 
 # Logging
 LOG_PATH=data/logs
 LOG_LEVEL=Info
 
-# Metadata (will be added to each JSON object)
 META_environment=production
 META_region=eu-central-1
-
-# Email Notification
-API_EMAIL=api.alerts@example.com
-SMTP_SERVER=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=api.admin@example.com
-SMTP_PASSWORD=topsecret
-SMTP_FROM=api.admin@example.com
-SMTP_STARTTLS=true
+META_DEBUG=yes
 ```
 
 ## Usage
@@ -186,3 +207,5 @@ Copyright (c) 2026 ZHENG Robert
 ---
 
 :vulcan_salute:
+
+<p align="right">(<a href="#top">back to top</a>)</p>

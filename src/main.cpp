@@ -7,8 +7,8 @@
  *
  * @file main.cpp
  * @brief Orchestrates the JSON validation, compression, and upload process.
- * @version 1.0.0
- * @date 2026-03-28
+ * @version 1.1.0
+ * @date 2026-03-29
  *
  * @author ZHENG Robert (robert@hase-zheng.net)
  * @copyright Copyright (c) 2026 ZHENG Robert
@@ -61,6 +61,14 @@ int main(int argc, char** argv) {
     if (comp_val == "zstd") config.api_compression = ju::CompressionType::Zstd;
     else if (comp_val == "gzip") config.api_compression = ju::CompressionType::Gzip;
     else config.api_compression = ju::CompressionType::None;
+
+    std::string meta_val = ju::get_env("API_META", "object");
+    std::transform(meta_val.begin(), meta_val.end(), meta_val.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    
+    if (meta_val == "object") config.api_meta = ju::ApiMetaType::Object;
+    else if (meta_val == "single") config.api_meta = ju::ApiMetaType::Single;
+    else config.api_meta = ju::ApiMetaType::None;
     
     // SMTP
     config.smtp_server = ju::get_env("SMTP_SERVER");

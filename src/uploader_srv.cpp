@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * @file uploader_srv.cpp
- * @version 1.0.0
- * @date 2026-03-28
+ * @version 1.1.0
+ * @date 2026-03-29
  *
  * @author ZHENG Robert (robert@hase-zheng.net)
  * @copyright Copyright (c) 2026 ZHENG Robert
@@ -181,12 +181,18 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
                                 auto j = nlohmann::json::parse(json_view);
                                 
                                 // Merge metadata from Config
-                                if (!state->config->metadata.empty()) {
-                                    if (!j.contains("metadata")) {
-                                        j["metadata"] = nlohmann::json::object();
-                                    }
-                                    for (const auto& [k, v] : state->config->metadata) {
-                                        j["metadata"][k] = v;
+                                if (!state->config->metadata.empty() && state->config->api_meta != ApiMetaType::None) {
+                                    if (state->config->api_meta == ApiMetaType::Object) {
+                                        if (!j.contains("metadata")) {
+                                            j["metadata"] = nlohmann::json::object();
+                                        }
+                                        for (const auto& [k, v] : state->config->metadata) {
+                                            j["metadata"][k] = v;
+                                        }
+                                    } else if (state->config->api_meta == ApiMetaType::Single) {
+                                        for (const auto& [k, v] : state->config->metadata) {
+                                            j[k] = v;
+                                        }
                                     }
                                 }
 
@@ -230,12 +236,18 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
                             auto j = nlohmann::json::parse(json_view);
 
                             // Merge metadata from Config
-                            if (!state->config->metadata.empty()) {
-                                if (!j.contains("metadata")) {
-                                    j["metadata"] = nlohmann::json::object();
-                                }
-                                for (const auto& [k, v] : state->config->metadata) {
-                                    j["metadata"][k] = v;
+                            if (!state->config->metadata.empty() && state->config->api_meta != ApiMetaType::None) {
+                                if (state->config->api_meta == ApiMetaType::Object) {
+                                    if (!j.contains("metadata")) {
+                                        j["metadata"] = nlohmann::json::object();
+                                    }
+                                    for (const auto& [k, v] : state->config->metadata) {
+                                        j["metadata"][k] = v;
+                                    }
+                                } else if (state->config->api_meta == ApiMetaType::Single) {
+                                    for (const auto& [k, v] : state->config->metadata) {
+                                        j[k] = v;
+                                    }
                                 }
                             }
 

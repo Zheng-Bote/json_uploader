@@ -7,8 +7,8 @@
  *
  * @file config_type.hpp
  * @brief Configuration structure.
- * @version 1.0.0
- * @date 2026-03-28
+ * @version 1.1.0
+ * @date 2026-03-29
  *
  * @author ZHENG Robert (robert@hase-zheng.net)
  * @copyright Copyright (c) 2026 ZHENG Robert
@@ -35,6 +35,15 @@ enum class CompressionType {
 };
 
 /**
+ * @brief API Metadata behavior types.
+ */
+enum class ApiMetaType {
+    None,
+    Object,
+    Single
+};
+
+/**
  * @brief Configuration parameters for the application.
  */
 struct Config {
@@ -51,6 +60,7 @@ struct Config {
     std::string api_user;
     std::string api_password;
     CompressionType api_compression = CompressionType::None;
+    ApiMetaType api_meta = ApiMetaType::None;
     
     // SMTP (for Email)
     std::optional<std::string> api_email;
