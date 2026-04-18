@@ -43,7 +43,15 @@ Expected<Config> CliParserCtrl::parse(int argc, char** argv) {
             config.env_encrypted = true;
         } else if (args[i] == "--env-pass-var" && i + 1 < args.size()) {
             config.env_pass_var = args[++i];
+        } else if (args[i] == "--version") {
+            config.show_version = true;
+        } else if (args[i] == "--check-version") {
+            config.check_version = true;
         }
+    }
+
+    if (config.show_version || config.check_version) {
+        return config;
     }
 
     if (config.json_path.empty()) {

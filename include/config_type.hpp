@@ -53,6 +53,8 @@ struct Config {
     bool env_encrypted = false;
     std::string env_pass_var = "ENV_PASS";
     bool send_email = false;
+    bool show_version = false;
+    bool check_version = false;
 
     // API
     std::string api_login_url;

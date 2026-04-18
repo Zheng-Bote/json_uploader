@@ -155,7 +155,8 @@ int main(int argc, char **argv) {
               return crow::response(400, "JSON must be object or array");
             }
 
-            // Check for META_DEBUG=yes (stored as metadata.DEBUG or top-level DEBUG)
+            // Check for META_DEBUG=yes (stored as metadata.DEBUG or top-level
+            // DEBUG)
             auto check_debug = [](const json &obj) {
               bool debug_found = false;
               json meta_data = json::object();

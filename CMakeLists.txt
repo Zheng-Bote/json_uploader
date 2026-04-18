@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 project(json_uploader 
-VERSION 1.0.0 
+VERSION 1.2.0 
 DESCRIPTION "JSON Uploader CLI Application"
 HOMEPAGE_URL "https://github.com/Zheng-Bote/json_uploader"
 LANGUAGES CXX)
@@ -10,6 +10,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# --- Configure (für rz_config.hpp) ---
+set(EXECUTABLE_NAME "${PROJECT_NAME}")
+set(PROG_LONGNAME "JSON Uploader CLI Application")
+set(PROG_CREATED "2026")
+set(PROG_AUTHOR "ZHENG Bote")
+set(PROG_ORGANIZATION_NAME "ZHENG Robert")
+set(PROG_ORGANIZATION_DOMAIN "net.hase-zheng")
+# create rz_config.hpp
+add_subdirectory(configure) 
+
 # Compiler flags
 if(MSVC)
     add_compile_options(/std:c++latest /W4)
@@ -17,19 +27,19 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wconversion)
 endif()
 
-# Dependencies
-include(FetchContent)
-
-find_package(PkgConfig REQUIRED)
+# Dependencies (Conan v2 - Static)
 find_package(CURL REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(simdjson REQUIRED)
-pkg_check_modules(ZSTD REQUIRED IMPORTED_TARGET libzstd)
+find_package(zstd REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(spdlog REQUIRED)
-# Valijson is header-only
-find_package(valijson QUIET) 
+find_package(valijson REQUIRED)
+find_package(libsodium REQUIRED)
 
+include(FetchContent)
+
+# dotenv-cpp remains as FetchContent
 FetchContent_Declare(
     dotenv-cpp
     GIT_REPOSITORY https://github.com/laserpants/dotenv-cpp.git
@@ -37,42 +47,35 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(dotenv-cpp)
 
-# libsodium - official repo has no CMakeLists.txt
-include(ExternalProject)
 FetchContent_Declare(
-    libsodium_src
-    GIT_REPOSITORY https://github.com/jedisct1/libsodium.git
-    GIT_TAG        stable
+  gh_update_checker
+  GIT_REPOSITORY https://github.com/Zheng-Bote/gh-update-checker.git
+  GIT_TAG        v1.0.8
 )
-FetchContent_GetProperties(libsodium_src)
-if(NOT libsodium_src_POPULATED)
-    FetchContent_Populate(libsodium_src)
-    
-    if(UNIX)
-        file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/libsodium_install/include)
-        ExternalProject_Add(libsodium_project
-            SOURCE_DIR ${libsodium_src_SOURCE_DIR}
-            CONFIGURE_COMMAND ${libsodium_src_SOURCE_DIR}/configure --prefix=${CMAKE_BINARY_DIR}/libsodium_install --disable-shared --with-pic
-            BUILD_COMMAND make -j4
-            INSTALL_COMMAND make install
-            BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/libsodium_install/lib/libsodium.a
-        )
-        add_library(sodium STATIC IMPORTED GLOBAL)
-        set_target_properties(sodium PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/libsodium_install/lib/libsodium.a
-            INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/libsodium_install/include
-        )
-        add_dependencies(sodium libsodium_project)
-    else()
-        # Fallback/Placeholder for Windows or other systems
-        message(WARNING "libsodium build not fully implemented for this platform in this script. Using find_package fallback.")
-        find_package(sodium REQUIRED)
-    endif()
+
+FetchContent_MakeAvailable(gh_update_checker)
+# Ensure gh_update_checker::gh_update_checker is available (for both FetchContent and find_package)
+if(TARGET gh_update_checker AND NOT TARGET gh_update_checker::gh_update_checker)
+    add_library(gh_update_checker::gh_update_checker ALIAS gh_update_checker)
 endif()
+
 
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+# Valijson often provides valijson::valijson or Valijson::Valijson, 
+# but as a header-only library, we'll ensure we have access via its include directory if the target is missing.
+if(NOT TARGET valijson::valijson)
+    if(valijson_INCLUDE_DIRS)
+        add_library(valijson::valijson INTERFACE IMPORTED)
+        set_target_properties(valijson::valijson PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${valijson_INCLUDE_DIRS}"
+        )
+    elseif(TARGET valijson)
+        add_library(valijson::valijson ALIAS valijson)
+    endif()
+endif()
 
 set(SOURCES
     src/main.cpp
@@ -96,20 +99,23 @@ set(SOURCES
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+# Target linking focusing on static Conan targets
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     CURL::libcurl
     ZLIB::ZLIB
     simdjson::simdjson
-    PkgConfig::ZSTD
+    $<IF:$<TARGET_EXISTS:zstd::libzstd_static>,zstd::libzstd_static,zstd::libzstd_shared>
     nlohmann_json::nlohmann_json
     spdlog::spdlog
+    $<IF:$<TARGET_EXISTS:ValiJSON::valijson>,ValiJSON::valijson,valijson::valijson>
+    $<IF:$<TARGET_EXISTS:libsodium::libsodium>,libsodium::libsodium,sodium>
     dotenv
-    sodium
+    gh_update_checker::gh_update_checker
 )
 
-
-file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/libs.txt" 
+# Standard metadata generation
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/project_libs.txt" 
      CONTENT "$<TARGET_PROPERTY:${PROJECT_NAME},LINK_LIBRARIES>")
-file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/include" 
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/include_paths.txt" 
      CONTENT "$<TARGET_PROPERTY:${PROJECT_NAME},INCLUDE_DIRECTORIES>")

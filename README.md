@@ -15,13 +15,18 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [Description](#description)
   - [Key Features:](#key-features)
 - [Dependencies](#dependencies)
   - [System Requirements (Ubuntu example)](#system-requirements-ubuntu-example)
-  - [Libraries managed via CMake](#libraries-managed-via-cmake)
+  - [Build Instructions](#build-instructions)
+    - [1. Configure Conan Profile](#1-configure-conan-profile)
+    - [2. Install Dependencies](#2-install-dependencies)
+    - [3. Configure and Build](#3-configure-and-build)
+  - [Libraries managed via Conan](#libraries-managed-via-conan)
 - [Documentation](#documentation)
 - [Configuration](#configuration)
   - [Environment File (`json_uploader.env`)](#environment-file-json_uploaderenv)
@@ -63,37 +68,56 @@ This tool is a high-performance CLI application designed for streaming large JSO
 
 ## Dependencies
 
-The project requires a C++23 compatible compiler and several libraries.
+The project requires a C++23 compatible compiler (e.g., GCC 15+) and uses **Conan v2** for dependency management.
 
 ### System Requirements (Ubuntu example)
 
-To install all necessary build tools and dependencies on Ubuntu, run:
+To install the basic build tools:
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y \
-    build-essential \
-    cmake \
-    git \
-    pkg-config \
-    autoconf \
-    automake \
-    libtool \
-    libcurl4-openssl-dev \
-    zlib1g-dev \
-    libsimdjson-dev \
-    libzstd-dev \
-    nlohmann-json3-dev \
-    libspdlog-dev \
-    libvalijson-dev
+sudo apt-get install -y build-essential cmake git pkg-config pip
+pip install "conan>=2.0"
 ```
 
-### Libraries managed via CMake
+### Build Instructions
 
-The following libraries are automatically downloaded and built during the configuration phase:
+The project uses Conan v2 with the `cmake_layout` and `CMakeToolchain`.
 
-- **dotenv-cpp**: For environment variable management.
-- **libsodium**: For secure `.env` file decryption.
+#### 1. Configure Conan Profile
+
+Ensure your Conan profile is set to C++23:
+
+```bash
+conan profile detect --force
+conan profile update settings.compiler.cppstd=23 default
+```
+
+#### 2. Install Dependencies
+
+This will download and build all required libraries (static by default) into the `build` directory:
+
+```bash
+conan install . --output-folder=build --build=missing -s compiler.cppstd=23
+```
+
+#### 3. Configure and Build
+
+Use the generated toolchain file to configure CMake:
+
+```bash
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+cmake --build . -j"$(nproc)"
+```
+
+### Libraries managed via Conan
+
+The following libraries are handled automatically:
+
+- **libcurl**, **zlib**, **simdjson**, **zstd**, **nlohmann_json**, **spdlog**, **valijson**, **libsodium**.
+
+**Note**: `dotenv-cpp` is currently fetched directly via CMake `FetchContent`.
 
 ## Documentation
 

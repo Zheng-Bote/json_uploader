@@ -49,5 +49,5 @@ target_link_libraries(crow_test_server PRIVATE
     nlohmann_json::nlohmann_json
 )
 
-file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/libs.txt" 
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/libs_test.txt" 
      CONTENT "$<TARGET_PROPERTY:crow_test_server,LINK_LIBRARIES>")
