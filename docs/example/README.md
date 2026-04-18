@@ -6,8 +6,11 @@ example upload and output
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 **Table of Contents**
+
+- [example upload](#example-upload)
+- [example output (test)](#example-output-test)
+- [example uploaded JSON data](#example-uploaded-json-data)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
