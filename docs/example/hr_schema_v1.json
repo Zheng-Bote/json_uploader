@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/employee-flat-schema-v1.json",
+  "title": "EmployeeRecordFlat",
+  "type": "object",
+  "required": ["schema_version"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+
+    "Building.Code": { "type": "string", "maxLength": 20 },
+    "Building.Description": { "type": "string", "maxLength": 100 },
+
+    "CellPhone": { "type": "string", "maxLength": 24 },
+
+    "DateOfBirth": { "type": "string", "format": "date" },
+    "DateOfHire": { "type": "string", "format": "date" },
+    "DateOfTermination": { "type": ["string", "null"], "format": "date" },
+
+    "Department.Code": { "type": "string", "maxLength": 20 },
+    "Department.Description": { "type": "string", "maxLength": 100 },
+
+    "Division.Code": { "type": "string", "maxLength": 20 },
+    "Division.Description": { "type": "string", "maxLength": 100 },
+
+    "DriverLicenseClass": { "type": "string", "maxLength": 2 },
+    "DriverLicenseNumber": { "type": "string", "maxLength": 30 },
+
+    "DriverLicenseState.Code": { "type": "string", "maxLength": 20 },
+    "DriverLicenseState.Description": { "type": "string", "maxLength": 100 },
+
+    "Email": { "type": "string", "maxLength": 250 },
+
+    "EmergencyContact": { "type": "string", "maxLength": 100 },
+    "EmergencyHomePhone": { "type": "string", "maxLength": 24 },
+    "EmergencyRelation": { "type": "string", "maxLength": 20 },
+    "EmergencyWorkPhone": { "type": "string", "maxLength": 24 },
+
+    "EmployeeNumber": { "type": "string", "maxLength": 20 },
+
+    "EmployeeType.Code": { "type": "string", "maxLength": 20 },
+    "EmployeeType.Description": { "type": "string", "maxLength": 100 },
+
+    "EthnicGroup.Code": { "type": "string", "maxLength": 20 },
+    "EthnicGroup.Description": { "type": "string", "maxLength": 100 },
+
+    "FloorArea.Code": { "type": "string", "maxLength": 20 },
+    "FloorArea.Description": { "type": "string", "maxLength": 100 },
+
+    "FirstName": { "type": "string", "maxLength": 50 },
+
+    "Gender": { "type": "integer" },
+
+    "GeographicLocation.Code": { "type": "string", "maxLength": 20 },
+    "GeographicLocation.Description": { "type": "string", "maxLength": 100 },
+
+    "HealthCenter.Code": { "type": "string", "maxLength": 20 },
+    "HealthCenter.Description": { "type": "string", "maxLength": 100 },
+
+    "HealthInsurance.Code": { "type": "string", "maxLength": 20 },
+    "HealthInsurance.Description": { "type": "string", "maxLength": 100 },
+
+    "HipaaAuth": { "type": "boolean" },
+    "HipaaAuthDate": { "type": "string", "format": "date" },
+
+    "HomeCity": { "type": "string", "maxLength": 40 },
+
+    "HomeCountry.Code": { "type": "string", "maxLength": 20 },
+    "HomeCountry.Description": { "type": "string", "maxLength": 100 },
+
+    "HomePhone": { "type": "string", "maxLength": 24 },
+
+    "HomeState.Code": { "type": "string", "maxLength": 20 },
+    "HomeState.Description": { "type": "string", "maxLength": 100 },
+
+    "HomeStreet1": { "type": "string", "maxLength": 240 },
+    "HomeStreet2": { "type": "string", "maxLength": 240 },
+
+    "HomeZip": { "type": "string", "maxLength": 12 },
+
+    "HourlyRate": { "type": "number" },
+
+    "JobPosition.Code": { "type": "string", "maxLength": 20 },
+    "JobPosition.Description": { "type": "string", "maxLength": 100 },
+
+    "JobPositionGroup.Code": { "type": "string", "maxLength": 20 },
+    "JobPositionGroup.Description": { "type": "string", "maxLength": 100 },
+
+    "JobType.Code": { "type": "string", "maxLength": 20 },
+    "JobType.Description": { "type": "string", "maxLength": 100 },
+
+    "Language.Code": { "type": "string", "maxLength": 20 },
+    "Language.Description": { "type": "string", "maxLength": 100 },
+
+    "LastName": { "type": "string", "maxLength": 50 },
+
+    "Location.Code": { "type": "string", "maxLength": 20 },
+    "Location.Description": { "type": "string", "maxLength": 100 },
+
+    "LoginId": { "type": "string", "maxLength": 30 },
+
+    "MaidenName": { "type": "string", "maxLength": 20 },
+
+    "MailStop": { "type": "string", "maxLength": 15 },
+
+    "MaritalStatus.Code": { "type": "string", "maxLength": 20 },
+    "MaritalStatus.Description": { "type": "string", "maxLength": 100 },
+
+    "MedicalInsuranceNumber": { "type": "string", "maxLength": 35 },
+
+    "MedicalRecordNumber": { "type": "string", "maxLength": 15 },
+
+    "MiddleName": { "type": "string", "maxLength": 50 },
+
+    "MonthlyWorkHours": { "type": "integer" },
+
+    "NickName": { "type": "string", "maxLength": 50 },
+
+    "Organization.Code": { "type": "string", "maxLength": 20 },
+    "Organization.Description": { "type": "string", "maxLength": 100 },
+
+    "Pager": { "type": "string", "maxLength": 24 },
+
+    "Photo": { "type": ["string", "null"], "contentEncoding": "base64" },
+
+    "Physician": { "type": "string", "maxLength": 100 },
+    "PhysicianCity": { "type": "string", "maxLength": 40 },
+    "PhysicianPhone": { "type": "string", "maxLength": 24 },
+
+    "PhysicianState.Code": { "type": "string", "maxLength": 20 },
+    "PhysicianState.Description": { "type": "string", "maxLength": 100 },
+
+    "PhysicianStreet": { "type": "string", "maxLength": 240 },
+    "PhysicianZip": { "type": "string", "maxLength": 12 },
+
+    "SecondaryHealthCenter.Code": { "type": "string", "maxLength": 20 },
+    "SecondaryHealthCenter.Description": { "type": "string", "maxLength": 100 },
+
+    "SeniorityDate": { "type": "string", "format": "date" },
+
+    "ShiftCode.Code": { "type": "string", "maxLength": 20 },
+    "ShiftCode.Description": { "type": "string", "maxLength": 100 },
+    "ShiftCode.ShiftBegins": { "type": "string", "format": "date" },
+    "ShiftCode.ShiftDuration": { "type": "integer" },
+
+    "SSNValue": { "type": "string", "maxLength": 20 },
+
+    "Supervisor.EmployeeNumber": { "type": "string", "maxLength": 20 },
+
+    "UDF1": { "type": "string", "maxLength": 60 },
+    "UDF2": { "type": "string", "maxLength": 60 },
+    "UDF3": { "type": "string", "maxLength": 60 },
+    "UDF4": { "type": "string", "maxLength": 60 },
+    "UDF5": { "type": "string", "maxLength": 60 },
+
+    "Union.Code": { "type": "string", "maxLength": 20 },
+    "Union.Description": { "type": "string", "maxLength": 100 },
+
+    "WorkExtension": { "type": "string", "maxLength": 10 },
+    "WorkPhone": { "type": "string", "maxLength": 24 },
+
+    "WorkStatus.Code": { "type": "string", "maxLength": 20 },
+    "WorkStatus.Description": { "type": "string", "maxLength": 100 }
+  }
+}

@@ -144,6 +144,35 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
             case Stage::Init:
                 state->stage = Stage::ProcessDoc;
                 if (!compress_helper(state, "[", FlushMode::Sync)) return CURL_READFUNC_ABORT;
+                
+                // Add METAJSON_OBJECT as a "JSON Header" (first element of the array)
+                if (state->config->metajson_object_template != "none") {
+                    std::string processed_tpl = state->config->metajson_object_template;
+                    for (const auto& [k, v] : state->config->metadata) {
+                        std::string placeholder = "#{META_" + k + "}";
+                        
+                        // Escape value for JSON context (remove surrounding quotes from dump)
+                        std::string escaped_v = nlohmann::json(v).dump();
+                        if (escaped_v.size() >= 2 && escaped_v.front() == '"' && escaped_v.back() == '"') {
+                            escaped_v = escaped_v.substr(1, escaped_v.size() - 2);
+                        }
+
+                        size_t pos = 0;
+                        while ((pos = processed_tpl.find(placeholder, pos)) != std::string::npos) {
+                            processed_tpl.replace(pos, placeholder.length(), escaped_v);
+                            pos += escaped_v.length();
+                        }
+                    }
+                    try {
+                        // Validate and re-dump to ensure it's clean JSON
+                        auto header_j = nlohmann::json::parse(processed_tpl);
+                        if (!compress_helper(state, header_j.dump(), FlushMode::Sync)) return CURL_READFUNC_ABORT;
+                        state->is_first_element = false; // Next element needs a comma
+                    } catch (const std::exception& ex) {
+                        spdlog::error("Failed to parse METAJSON_OBJECT for header: {}", ex.what());
+                        spdlog::debug("Problematic Header JSON: {}", processed_tpl);
+                    }
+                }
                 break;
 
             case Stage::ProcessDoc:
@@ -193,6 +222,33 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
                                         for (const auto& [k, v] : state->config->metadata) {
                                             j[k] = v;
                                         }
+                                    }
+                                }
+
+                                // Merge METAJSON_OBJECT if configured
+                                if (state->config->metajson_object_template != "none") {
+                                    std::string processed_tpl = state->config->metajson_object_template;
+                                    for (const auto& [k, v] : state->config->metadata) {
+                                        std::string placeholder = "#{" + k + "}";
+                                        
+                                        // Escape value for JSON context (remove surrounding quotes from dump)
+                                        std::string escaped_v = nlohmann::json(v).dump();
+                                        if (escaped_v.size() >= 2 && escaped_v.front() == '"' && escaped_v.back() == '"') {
+                                            escaped_v = escaped_v.substr(1, escaped_v.size() - 2);
+                                        }
+
+                                        size_t pos = 0;
+                                        while ((pos = processed_tpl.find(placeholder, pos)) != std::string::npos) {
+                                            processed_tpl.replace(pos, placeholder.length(), escaped_v);
+                                            pos += escaped_v.length();
+                                        }
+                                    }
+                                    try {
+                                        auto meta_j = nlohmann::json::parse(processed_tpl);
+                                        j.merge_patch(meta_j);
+                                    } catch (const std::exception& ex) {
+                                        spdlog::error("Failed to parse or merge METAJSON_OBJECT: {}", ex.what());
+                                        spdlog::debug("Problematic JSON after substitution: {}", processed_tpl);
                                     }
                                 }
 
@@ -248,6 +304,32 @@ size_t UploaderSrv::ReadCallback(char* ptr, size_t size, size_t nmemb, void* use
                                     for (const auto& [k, v] : state->config->metadata) {
                                         j[k] = v;
                                     }
+                                }
+                            }
+
+                            // Merge METAJSON_OBJECT if configured
+                            if (state->config->metajson_object_template != "none") {
+                                std::string processed_tpl = state->config->metajson_object_template;
+                                for (const auto& [k, v] : state->config->metadata) {
+                                    std::string placeholder = "#{META_" + k + "}";
+                                    
+                                    // Escape value for JSON context
+                                    std::string escaped_v = nlohmann::json(v).dump();
+                                    if (escaped_v.size() >= 2 && escaped_v.front() == '"' && escaped_v.back() == '"') {
+                                        escaped_v = escaped_v.substr(1, escaped_v.size() - 2);
+                                    }
+
+                                    size_t pos = 0;
+                                    while ((pos = processed_tpl.find(placeholder, pos)) != std::string::npos) {
+                                        processed_tpl.replace(pos, placeholder.length(), escaped_v);
+                                        pos += escaped_v.length();
+                                    }
+                                }
+                                try {
+                                    auto meta_j = nlohmann::json::parse(processed_tpl);
+                                    j.merge_patch(meta_j);
+                                } catch (const std::exception& ex) {
+                                    spdlog::error("Failed to parse or merge METAJSON_OBJECT in array: {}", ex.what());
                                 }
                             }
 

@@ -6,14 +6,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Dependencies: Crow and Asio via FetchContent, nlohmann_json via Conan (if available)
 include(FetchContent)
 
-FetchContent_Declare(
-    nlohmann_json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG        v3.11.3
-)
-FetchContent_MakeAvailable(nlohmann_json)
+# Try to find nlohmann_json from Conan first, fallback to FetchContent if not found
+find_package(nlohmann_json QUIET)
+if(NOT nlohmann_json_FOUND)
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG        v3.11.3
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+endif()
 
 FetchContent_Declare(
     asio
@@ -37,8 +42,7 @@ add_executable(crow_test_server
 target_include_directories(crow_test_server
     PRIVATE
         ${crow_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_BINARY_DIR}/include
+        ${CMAKE_SOURCE_DIR}/../include
     ${ASIO_INCLUDE_DIR}
 )
 

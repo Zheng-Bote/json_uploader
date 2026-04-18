@@ -117,7 +117,7 @@ The following libraries are handled automatically:
 
 - **libcurl**, **zlib**, **simdjson**, **zstd**, **nlohmann_json**, **spdlog**, **valijson**, **libsodium**.
 
-**Note**: `dotenv-cpp` is currently fetched directly via CMake `FetchContent`.
+**Note**: `dotenv-cpp` and `gh-update-checker` are currently fetched directly via CMake `FetchContent`.
 
 ## Documentation
 
@@ -182,6 +182,8 @@ META_DEBUG=yes
 - `--encrypted`: Enable decryption of the `.env` file before parsing.
 - `--env-pass-var <name>`: Environment variable name containing the decryption password (Default: `ENV_PASS`).
 - `--email`: Enable email notification after completion.
+- `--version`: Show application version and exit.
+- `--check-version`: Check for updates on GitHub and exit.
 
 ## Architecture
 

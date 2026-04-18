@@ -88,6 +88,7 @@ int main(int argc, char **argv) {
   config.api_user = ju::get_env("API_USER");
   config.api_password = ju::get_env("API_PASSWORD");
   config.api_email = ju::get_env("API_EMAIL");
+  config.metajson_object_template = ju::get_env("METAJSON_OBJECT", "none");
 
   std::string comp_val = ju::get_env("API_COMPRESSION", "none");
   std::transform(

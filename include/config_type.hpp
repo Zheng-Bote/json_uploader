@@ -56,6 +56,9 @@ struct Config {
     bool show_version = false;
     bool check_version = false;
 
+    // METAJSON_OBJECT template
+    std::string metajson_object_template = "none";
+
     // API
     std::string api_login_url;
     std::string api_upload_url;

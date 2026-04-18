@@ -26,6 +26,7 @@ This document provides a detailed overview of the system architecture, design pa
 - **Controller Pattern**: CLI parsing and main workflow orchestration are handled by controllers (`CliParserCtrl`).
 - **Utility Pattern**: Reusable, stateless logic is implemented in utility modules (`EnvUtil`, `LoggerUtil`, `ValidatorUtil`).
 - **Streaming Architecture**: Uses a callback-driven approach for data processing to handle large files without excessive memory consumption.
+- **Dependency Management (Conan v2)**: Adheres to modern C++ standards by managing all binary dependencies through Conan v2, ensuring consistent and reproducible builds with static linking.
 
 ## Diagrams
 
@@ -166,11 +167,10 @@ graph TD
 3.  **Authentication Phase**: Credentials from the environment are used to obtain a Bearer Token.
 4.  **Upload Phase**:
     - The JSON file is read as a stream using `simdjson`.
+    - **JSON Header**: If `METAJSON_OBJECT` is configured, it is processed (placeholder substitution using `#{key}` and escaping) and sent as the first element of the array.
     - Each object is validated against the schema.
     - Environment variables prefixed with `META_` are merged into the object (Behavior controlled by `API_META`).
-      - `none`: No metadata is added.
-      - `object`: Metadata is added as a nested `metadata` object (default).
-      - `single`: Metadata is added as top-level attributes.
+    - **Object Merge**: The processed `METAJSON_OBJECT` is merged into each individual object using JSON Merge Patch.
     - The object is compressed using the configured algorithm (Zstd or Gzip).
     - Data is sent to the API via chunked transfer encoding.
 5.  **Notification Phase**: If enabled, an email is sent with the final status.
