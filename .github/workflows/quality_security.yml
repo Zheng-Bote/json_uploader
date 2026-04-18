@@ -26,44 +26,24 @@ jobs:
 
       - name: Prepare release assets
         run: |
+          set -euo pipefail
           mkdir -p release-assets
           version="${{ steps.version.outputs.version }}"
 
           echo "=== Collecting release assets for version: $version ==="
-          echo ""
 
-          # Copy build artifacts
-          echo "=== Build Artifacts ==="
           if [ -d "build" ]; then
-            # Copy build-static if it exists (legacy)
-            if [ -d "build/build-static" ]; then
-              cp -r build/build-static release-assets/
-              echo "✓ Copied build/build-static/"
-            fi
-            
-            # Copy build folder but exclude large directories
-            if [ -d "build" ]; then
-              echo "Copying build directory..."
-              mkdir -p release-assets/build
-              
-              # Copy all files
-              find build -type f -exec cp {} release-assets/build/ \;
-              
-              # Remove .vscode directory if present
-              if [ -d "release-assets/build/.vscode" ]; then
-                rm -rf release-assets/build/.vscode
-                echo "✓ Removed .vscode directory"
-              fi
-              
-              echo "✓ Copied build/ directory"
-            fi
+            echo "Copying build directory (preserving structure)..."
+            mkdir -p release-assets/build
+            # Use rsync to preserve structure and exclude common large/irrelevant dirs
+            rsync -a --exclude='.vscode' --exclude='node_modules' --exclude='*.o' build/ release-assets/build/
+            echo "✓ Copied build/ directory to release-assets/build/"
           else
             echo "⚠️  build/ directory not found"
           fi
 
           echo ""
           echo "=== Additional Files ==="
-          # Copy CHANGELOG
           if [ -f "CHANGELOG.md" ]; then
             cp CHANGELOG.md release-assets/
             echo "✓ Copied CHANGELOG.md"
@@ -73,20 +53,28 @@ jobs:
 
           echo ""
           echo "=== Release Assets Summary ==="
-          ls -lah release-assets/
+          find release-assets -maxdepth 2 -type f -print | sed -e 's/^/ - /'
           echo ""
-          echo "Total files: $(ls release-assets/ | wc -l)"
+          echo "Total files: $(find release-assets -type f | wc -l)"
 
       - name: Extract Release Notes from CHANGELOG
         run: |
+          set -euo pipefail
           version="${{ steps.version.outputs.version }}"
           echo "Extracting release notes for version: $version"
 
           if [ -f "CHANGELOG.md" ]; then
-            # Extract section between version header and next header or end
-            sed -n "/^## \[$version\]/,/^## \[/p" CHANGELOG.md | sed '$ d' > release_notes.txt
-            
-            # If file is empty or doesn't contain the version, create a default
+            # Extract section starting at a header that contains the version (supports [v1.2.3], v1.2.3, 1.2.3)
+            awk -v ver="$version" '
+              BEGIN {found=0}
+              /^##[[:space:]]/ {
+                if (found) exit
+                header = $0
+                if (index(header, ver) > 0) { found=1; print header; next }
+              }
+              found { print }
+            ' CHANGELOG.md > release_notes.txt
+
             if [ ! -s release_notes.txt ]; then
               echo "## Release v$version" > release_notes.txt
               echo "" >> release_notes.txt
@@ -100,15 +88,16 @@ jobs:
 
           echo ""
           echo "=== Release Notes Preview ==="
-          cat release_notes.txt
+          sed -n '1,200p' release_notes.txt
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ steps.version.outputs.tag }}
           name: "Release v${{ steps.version.outputs.version }}"
           body_path: release_notes.txt
           draft: false
           prerelease: false
           files: |
-            release-assets/CHANGELOG.md
+            release-assets/*
