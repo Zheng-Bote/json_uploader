@@ -1,11 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
-
-- [SBOM Security Report: JSONuploader](#sbom-security-report-jsonuploader)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # SBOM Security Report: JSONuploader
 
 - **Scan Date:** 2026-04-18
@@ -13,12 +5,12 @@
 
 | Package Name | Version | Fixed Version | Type | Licenses | Security Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| libcurl | 8.14.1 | 8.19.0~rc3-1 | conan | curl | ❌ 26 Vulnerabilities |
+| libcurl | 8.19.0 | 8.19.0~rc3-1 | conan | curl | ❌ 23 Vulnerabilities |
 | zlib | 1.3.1 | 1:1.3.dfsg-2 | conan | Zlib | ❌ 20 Vulnerabilities |
-| simdjson | 3.12.3 | - | conan | UNKNOWN | ✅ SAFE |
+| simdjson | 3.9.0 | - | conan | UNKNOWN | ✅ SAFE |
 | zstd | 1.5.5 | - | conan | UNKNOWN | ✅ SAFE |
-| nlohmann_json | 3.12.0 | - | conan | MIT | ✅ SAFE |
-| spdlog | 1.15.3 | 1:1.15.2+ds-1 | conan | MIT | ❌ 1 Vulnerabilities |
+| nlohmann_json | 3.11.2 | - | conan | MIT | ✅ SAFE |
+| spdlog | 1.17.0 | 1:1.15.2+ds-1 | conan | MIT | ❌ 1 Vulnerabilities |
 | valijson | 1.0 | - | conan | UNKNOWN | ✅ SAFE |
 | libsodium | 1.0.21 | - | conan | UNKNOWN | ✅ SAFE |
 | ZLIB::ZLIB | unknown | - | cmake_target | UNKNOWN | ❓ UNKNOWN |

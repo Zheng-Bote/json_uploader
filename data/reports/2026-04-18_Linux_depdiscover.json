@@ -120,15 +120,6 @@
           "suppression_reason": ""
         },
         {
-          "fixed_version": "8.17.0-2",
-          "id": "DEBIAN-CVE-2025-11563",
-          "score": 5.0,
-          "severity": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:L/I:L/A:N",
-          "summary": "URLs containing percent-encoded slashes (`/` or `\\`) can trick wcurl into saving the output file outside of the current directory without the user ...",
-          "suppressed": false,
-          "suppression_reason": ""
-        },
-        {
           "fixed_version": "8.18.0~rc2-1",
           "id": "DEBIAN-CVE-2025-13034",
           "score": 7.0,
@@ -183,24 +174,6 @@
           "suppression_reason": ""
         },
         {
-          "fixed_version": "8.14.1-1",
-          "id": "DEBIAN-CVE-2025-5399",
-          "score": 7.0,
-          "severity": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-          "summary": "Due to a mistake in libcurl's WebSocket code, a malicious server can send a particularly crafted packet which makes libcurl get trapped in an endle...",
-          "suppressed": false,
-          "suppression_reason": ""
-        },
-        {
-          "fixed_version": "8.16.0~rc2-1",
-          "id": "DEBIAN-CVE-2025-9086",
-          "score": 7.0,
-          "severity": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-          "summary": "1. A cookie is set using the `secure` keyword for `https://target`   2. curl is redirected to or otherwise made to speak with `http://target` (same...",
-          "suppressed": false,
-          "suppression_reason": ""
-        },
-        {
           "fixed_version": "8.19.0~rc3-1",
           "id": "DEBIAN-CVE-2026-1965",
           "score": 7.0,
@@ -237,17 +210,15 @@
           "suppression_reason": ""
         }
       ],
-      "headers": [
-        "/usr/include/x86_64-linux-gnu/curl/curl.h"
-      ],
+      "headers": [],
       "libraries": [],
       "licenses": [
         "curl"
       ],
       "name": "libcurl",
-      "source": "pkgconfig",
+      "source": "manifest",
       "type": "conan",
-      "version": "8.14.1"
+      "version": "8.19.0"
     },
     {
       "cves": [
@@ -438,7 +409,7 @@
         "Zlib"
       ],
       "name": "zlib",
-      "source": "pkgconfig",
+      "source": "manifest",
       "type": "conan",
       "version": "1.3.1"
     },
@@ -460,9 +431,9 @@
         "UNKNOWN"
       ],
       "name": "simdjson",
-      "source": "pkgconfig",
+      "source": "manifest",
       "type": "conan",
-      "version": "3.12.3"
+      "version": "3.9.0"
     },
     {
       "cves": [
@@ -506,9 +477,9 @@
         "MIT"
       ],
       "name": "nlohmann_json",
-      "source": "pkgconfig",
+      "source": "manifest",
       "type": "conan",
-      "version": "3.12.0"
+      "version": "3.11.2"
     },
     {
       "cves": [
@@ -532,9 +503,9 @@
         "MIT"
       ],
       "name": "spdlog",
-      "source": "pkgconfig",
+      "source": "manifest",
       "type": "conan",
-      "version": "1.15.3"
+      "version": "1.17.0"
     },
     {
       "cves": [

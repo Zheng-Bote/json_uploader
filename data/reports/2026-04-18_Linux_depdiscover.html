@@ -44,12 +44,12 @@
   <tbody>
     <tr class="vuln">
       <td><strong>libcurl</strong></td>
-      <td>8.14.1</td>
-      <td><details><summary>19 Versions</summary><ul class="clean-list"><li><strong>v7.79.1-1</strong></li><li><strong>v7.86.0-1</strong></li><li><strong>v7.86.0-3</strong></li><li><strong>v7.88.1-1</strong></li><li><strong>v7.88.1-10</strong></li><li><strong>v8.11.0-1</strong></li><li><strong>v8.12.0+git20250209.89ed161+ds-1</strong></li><li><strong>v8.14.1-1</strong></li><li><strong>v8.16.0-1</strong></li><li><strong>v8.16.0~rc2-1</strong></li><li><strong>v8.17.0-2</strong></li><li><strong>v8.17.0~rc2-1</strong></li><li><strong>v8.18.0-1</strong></li><li><strong>v8.18.0~rc2-1</strong></li><li><strong>v8.18.0~rc3-1</strong></li><li><strong>v8.19.0-1</strong></li><li><strong>v8.19.0~rc3-1</strong></li><li><strong>v8.5.0-1</strong></li><li><strong>v8.7.1-1</strong></li></ul></details></td>
+      <td>8.19.0</td>
+      <td><details><summary>16 Versions</summary><ul class="clean-list"><li><strong>v7.79.1-1</strong></li><li><strong>v7.86.0-1</strong></li><li><strong>v7.86.0-3</strong></li><li><strong>v7.88.1-1</strong></li><li><strong>v7.88.1-10</strong></li><li><strong>v8.11.0-1</strong></li><li><strong>v8.12.0+git20250209.89ed161+ds-1</strong></li><li><strong>v8.16.0-1</strong></li><li><strong>v8.17.0~rc2-1</strong></li><li><strong>v8.18.0-1</strong></li><li><strong>v8.18.0~rc2-1</strong></li><li><strong>v8.18.0~rc3-1</strong></li><li><strong>v8.19.0-1</strong></li><li><strong>v8.19.0~rc3-1</strong></li><li><strong>v8.5.0-1</strong></li><li><strong>v8.7.1-1</strong></li></ul></details></td>
       <td>conan</td>
       <td><span class="badge">curl</span></td>
       <td><span class="badge" style="background-color:#fd7e14; color:white; font-size: 100%;">7.0</span></td>
-      <td><span class="vuln-title">❌ 26 Vulnerabilities</span>
+      <td><span class="vuln-title">❌ 23 Vulnerabilities</span>
 <details><summary>Show details</summary>
 <ul class="clean-list">
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2021-22922" target="_blank">DEBIAN-CVE-2021-22922</a>: When curl is instructed to download content using the metalink feature, theco...</li>
@@ -65,15 +65,12 @@
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-0725" target="_blank">DEBIAN-CVE-2025-0725</a>: When libcurl is asked to perform automatic gzip decompression of content-enco...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-10148" target="_blank">DEBIAN-CVE-2025-10148</a>: curl's websocket code did not update the 32 bit mask pattern for each new  ou...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-10966" target="_blank">DEBIAN-CVE-2025-10966</a>: curl's code for managing SSH connections when SFTP was done using the wolfSSH...</li>
-  <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-11563" target="_blank">DEBIAN-CVE-2025-11563</a>: URLs containing percent-encoded slashes (`/` or `\`) can trick wcurl into sav...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-13034" target="_blank">DEBIAN-CVE-2025-13034</a>: When using `CURLOPT_PINNEDPUBLICKEY` option with libcurl or `--pinnedpubkey` ...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-14017" target="_blank">DEBIAN-CVE-2025-14017</a>: When doing multi-threaded LDAPS transfers (LDAP over TLS) with libcurl, chang...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-14524" target="_blank">DEBIAN-CVE-2025-14524</a>: When an OAuth2 bearer token is used for an HTTP(S) transfer, and that transfe...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-14819" target="_blank">DEBIAN-CVE-2025-14819</a>: When doing TLS related transfers with reused easy or multi handles and alteri...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-15079" target="_blank">DEBIAN-CVE-2025-15079</a>: When doing SSH-based transfers using either SCP or SFTP, and setting the know...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-15224" target="_blank">DEBIAN-CVE-2025-15224</a>: When doing SSH-based transfers using either SCP or SFTP, and asked to do publ...</li>
-  <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-5399" target="_blank">DEBIAN-CVE-2025-5399</a>: Due to a mistake in libcurl's WebSocket code, a malicious server can send a p...</li>
-  <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2025-9086" target="_blank">DEBIAN-CVE-2025-9086</a>: 1. A cookie is set using the `secure` keyword for `https://target`   2. curl ...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2026-1965" target="_blank">DEBIAN-CVE-2026-1965</a>: libcurl can in some circumstances reuse the wrong connection when asked to do...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2026-3783" target="_blank">DEBIAN-CVE-2026-3783</a>: When an OAuth2 bearer token is used for an HTTP(S) transfer, and that transfe...</li>
   <li style=""><a class="cve-link" href="https://osv.dev/vulnerability/DEBIAN-CVE-2026-3784" target="_blank">DEBIAN-CVE-2026-3784</a>: curl would wrongly reuse an existing HTTP proxy connection doing CONNECT to a...</li>
@@ -116,7 +113,7 @@
     </tr>
     <tr class="safe">
       <td><strong>simdjson</strong></td>
-      <td>3.12.3</td>
+      <td>3.9.0</td>
       <td>-</td>
       <td>conan</td>
       <td><span class="badge">UNKNOWN</span></td>
@@ -134,7 +131,7 @@
     </tr>
     <tr class="safe">
       <td><strong>nlohmann_json</strong></td>
-      <td>3.12.0</td>
+      <td>3.11.2</td>
       <td>-</td>
       <td>conan</td>
       <td><span class="badge">MIT</span></td>
@@ -143,7 +140,7 @@
     </tr>
     <tr class="vuln">
       <td><strong>spdlog</strong></td>
-      <td>1.15.3</td>
+      <td>1.17.0</td>
       <td><details><summary>1 Version</summary><ul class="clean-list"><li><strong>v1:1.15.2+ds-1</strong></li></ul></details></td>
       <td>conan</td>
       <td><span class="badge">MIT</span></td>
