@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=json_uploader
+GenericName=JSON Uploader
+Comment=JSON Uploader
+Exec=json_uploader
+Icon=app_icon
+Terminal=true
+Categories=Development;Engineering;
+Keywords=json;
+StartupNotify=true
+MimeType=application/json;
