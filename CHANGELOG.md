@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `--check-version`: Checks for newer versions on GitHub using `gh-update-checker`.
 - **METAJSON_OBJECT Feature**:
   - Added support for `METAJSON_OBJECT` environment variable as a "JSON Header".
-  - Implemented `#{key}` placeholder substitution within the `METAJSON_OBJECT` template.
+  - Implemented `#{META_key}` placeholder substitution within the `METAJSON_OBJECT` template.
   - Added automatic JSON-compliant escaping for metadata values to ensure stream validity.
   - Integrated `METAJSON_OBJECT` as the first element of the outgoing JSON array.
 

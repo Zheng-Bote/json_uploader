@@ -1,0 +1,18 @@
+JSON Uploader
+Copyright (c) 2026 ZHENG Robert
+
+This product includes software developed by ZHENG Robert (robert@hase-zheng.net).
+
+This project uses the following third-party libraries:
+- libcurl (curl/libcurl license)
+- zlib (zlib license)
+- simdjson (Apache-2.0)
+- zstd (BSD 3-Clause or GPLv2)
+- nlohmann_json (MIT)
+- spdlog (MIT)
+- valijson (MIT)
+- libsodium (ISC)
+- dotenv-cpp (MIT)
+- gh-update-checker (Apache-2.0)
+- Crow (BSD 3-Clause)
+- Asio (Boost Software License)
